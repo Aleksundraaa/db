@@ -54,7 +54,7 @@ namespace Tests
 
             var deserializedEntity = BsonSerializer.Deserialize<TEntity>(new MemoryStream(bytes));
 
-            Console.WriteLine(deserializedEntity);
+            Console.WriteLine(deserializedEntity);  
             deserializedEntity.Should().BeEquivalentTo(entity);
         }
     }
