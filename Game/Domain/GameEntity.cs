@@ -80,27 +80,54 @@ public class GameEntity
     public GameTurnEntity FinishTurn()
     {
         var winnerId = Guid.Empty;
-        for (int i = 0; i < 2; i++)
+        var gameResult = GameResult.Draw;
+        var player1 = Players[0];
+        var player2 = Players[1];
+
+        if (!player1.Decision.HasValue || !player2.Decision.HasValue)
+            throw new InvalidOperationException();
+
+        if (player1.Decision.Value.Beats(player2.Decision.Value))
         {
-            var player = Players[i];
-            var opponent = Players[1 - i];
-            if (!player.Decision.HasValue || !opponent.Decision.HasValue)
-                throw new InvalidOperationException();
-            if (player.Decision.Value.Beats(opponent.Decision.Value))
-            {
-                player.Score++;
-                winnerId = player.UserId;
-            }
+            player1.Score++;
+            winnerId = player1.UserId;
+            gameResult = GameResult.Win;
+        }
+        else if (player2.Decision.Value.Beats(player1.Decision.Value))
+        {
+            player2.Score++;
+            winnerId = player2.UserId;
+            gameResult = GameResult.Win;
         }
 
-        //TODO Заполнить все внутри GameTurnEntity, в том числе winnerId
-        var result = new GameTurnEntity();
-        // Это должно быть после создания GameTurnEntity
+        var firstPlayerSnapshot = new Player(player1.UserId, player1.Name)
+        {
+            Score = player1.Score,
+            Decision = player1.Decision
+        };
+
+        var secondPlayerSnapshot = new Player(player2.UserId, player2.Name)
+        {
+            Score = player2.Score,
+            Decision = player2.Decision
+        };
+
+        var result = new GameTurnEntity
+        {
+            GameId = Id,
+            TurnNumber = CurrentTurnIndex,
+            FirstPlayer = firstPlayerSnapshot,
+            SecondPlayer = secondPlayerSnapshot,
+            WinnerId = winnerId,
+            Result = gameResult
+        };
+
         foreach (var player in Players)
             player.Decision = null;
         CurrentTurnIndex++;
         if (CurrentTurnIndex == TurnsCount)
             Status = GameStatus.Finished;
+
         return result;
     }
 }

@@ -4,7 +4,6 @@ using MongoDB.Driver;
 
 namespace Game.Domain;
 
-// TODO Сделать по аналогии с MongoUserRepository
 public class MongoGameRepository : IGameRepository
 {
     private readonly IMongoCollection<GameEntity> gameCollection;
